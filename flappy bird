@@ -1,0 +1,106 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
+#pragma warning(disable:4996)
+#include <windows.h>
+
+
+// 全局变量
+int bird_x, bird_y; // 小鸟
+int high, width; //  游戏画面尺寸
+int bar_y, bar_xTop, bar_xDown;  //障碍物坐标
+int score; //得分
+
+
+void gotoxy(int x, int y)//类似于清屏函数，光标移动到原点位置进行重画
+{
+	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD pos;
+	pos.X = x;
+	pos.Y = y;
+	SetConsoleCursorPosition(handle, pos);
+}
+int startup()
+{
+	high = 15;
+	width = 25;
+	bird_x = 0;
+	bird_y = width / 3;
+	bar_y = width;
+	bar_xTop = high / 10;
+	bar_xDown =high / 2;
+	
+}
+
+
+void show()
+{
+	gotoxy(0, 0);//将光标移动到原点进行重写
+	int i, j;
+	for (i = 0; i < high+1; i++)
+	{
+		for (j = 0; j <=width; j++)
+		{
+			if ((i == bird_x) && (j == bird_y))
+				printf("@");   //输出小鸟
+			else if ((j == bar_y) && ((i <= bar_xTop) || (i >= bar_xDown)))
+				printf("*");
+			else
+			      printf(" ");
+			
+		}
+		printf("\n");
+	}
+	printf("得分：%d", score);
+	
+}
+
+void updateWithoutInput()
+{
+	bird_x++;
+	if(bar_y>0)
+	bar_y--;
+	else
+	{
+		bar_y = width;
+		int ranPosition = rand() % (high-3);
+		bar_xTop = ranPosition;
+		bar_xDown = ranPosition + high/3 ;
+	}
+	Sleep(200);
+}
+
+
+
+
+void updateWithInput()
+{
+	if (bird_y==bar_y)
+	{
+		if ((bird_x > bar_xTop) && (bird_x < bar_xDown))
+			score++;
+		else
+		{
+			getchar();
+			exit(0); }
+			
+	}
+	char input;
+	if(kbhit())
+	{
+		input = getch();
+		if (input == ' ')
+			bird_x = bird_x - 2;  // 位置上移
+		
+	}
+}
+void main()
+{
+	startup();    // 数据初始化
+	while (1)  //  游戏循环执行
+	{
+		show();   // 显示画面
+		updateWithoutInput();  // 与用户输入无关的更新
+		updateWithInput();    // 与用户输入有关的更新
+	}
+}
